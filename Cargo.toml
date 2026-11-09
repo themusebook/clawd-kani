@@ -1,0 +1,29 @@
+[package]
+name = "clawd-kani"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Reusable Kani formal-verification primitives for Solana protocol math: Percolator-style risk, value-conserving splits, staking multipliers, CPI allowlists and agent invariants"
+keywords = ["kani", "formal-verification", "solana", "proof", "invariant"]
+categories = ["development-tools::testing"]
+readme = "README.md"
+
+[features]
+default = []
+# Wider symbolic domains for the risk proofs (slower; run in the full profile).
+kani-full = []
+# Even wider domains (manual / weekly runs only).
+kani-stress = ["kani-full"]
+# Symbolic agent accounts, CPI allowlists, PDA limits, oracle consensus, FSM guards.
+solana-agent = []
+# Real solana_program::AccountInfo generators + lamport snapshots.
+solana-account-info = ["dep:solana-program"]
+
+[dependencies]
+solana-program = { version = "2.3.0", optional = true }
+
+# The `kani` crate is intentionally NOT a dependency: it ships with the
+# Kani verifier and is provided by `cargo kani` when it builds this crate
+# with `--cfg kani`. See https://model-checking.github.io/kani/
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(kani)'] }

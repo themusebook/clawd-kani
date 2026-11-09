@@ -1,0 +1,59 @@
+name: Kani
+
+# clawd-kani proof profiles. Smoke is the always-on gate for pushes and
+# PRs; the full profile is too heavy for per-PR runs (CBMC 128-bit
+# division), so it runs weekly and on manual dispatch.
+#
+# Toolchain per README.md:
+#   cargo install --locked kani-verifier && cargo kani setup
+# (Local verification of record used Kani 0.68.0.)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly full-profile run — Mondays 06:00 UTC
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  kani-smoke:
+    # Fast subset (6 harnesses) — the always-on gate for pushes and PRs.
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install Kani verifier
+        run: cargo install --locked kani-verifier
+
+      - name: Set up Kani
+        run: cargo kani setup
+
+      - name: Kani smoke profile
+        run: scripts/kani-smoke.sh
+
+  kani-full:
+    # Everything: all features, wide-domain harnesses, both flow examples.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install Kani verifier
+        run: cargo install --locked kani-verifier
+
+      - name: Set up Kani
+        run: cargo kani setup
+
+      - name: Kani full profile
+        run: scripts/kani-full.sh

@@ -1,0 +1,12 @@
+[package]
+name = "clawd-kani-example-09-flow-agent-cpi"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+publish = false
+
+[dependencies]
+clawd-kani = { path = "../..", features = ["solana-agent"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(kani)'] }

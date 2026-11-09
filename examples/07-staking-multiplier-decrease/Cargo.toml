@@ -1,0 +1,12 @@
+[package]
+name = "clawd-kani-example-07-staking-multiplier-decrease"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+publish = false
+
+[dependencies]
+clawd-kani = { path = "../.." }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(kani)'] }
